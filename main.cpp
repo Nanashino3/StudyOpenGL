@@ -1,36 +1,65 @@
-#include <GLFW/glfw3.h>
+#include <cstdlib>
 #include <iostream>
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
 
-const int g_width = 640;
-const int g_height = 480;
-
-int main(void)
+int main()
 {
-    // GLFWの初期化
-    if(!glfwInit()){ return -1; }
-    
-    // ウィンドウの作成
-    GLFWwindow* window = glfwCreateWindow(g_width, g_height, "Simple", NULL, NULL);
-    if(!window){
-        glfwTerminate();
-        return -1;
-    }
+	// GLFWを初期化する
+	if(!glfwInit())
+	{
+		std::cerr << "Can't Initialize GLFW" << std::endl;
+		return -1;
+	}
 
-    glfwMakeContextCurrent(window);
-    glfwSwapInterval(1);
+	// プログラム終了時の処理を登録する
+	atexit(glfwTerminate);
 
-    // ゲームループ
-    while(!glfwWindowShouldClose(window)){
-        // バッファのクリア
-        glClearColor(0.2f, 0.2f, 0.2f, 0.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+	// OpenGL Version 4.6 Core Profile を選択する
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-        // ダブルバッファのスワップ
-        glfwSwapBuffers(window);
-    }
+	// ウィンドウを作成する
+	GLFWwindow* const window = glfwCreateWindow(640, 480, "Hello!", NULL, NULL);
+	if(window == NULL)
+	{
+		std::cerr << "Can't Create GLFW Window" << std::endl;
+		return -1;
+	}
 
-    // GLFWの終了処理
-    glfwTerminate();
+	// 作成したウィンドウをOpenGLの処理対象にする
+	glfwMakeContextCurrent(window);
 
-    return 0;
+	// GLEWを初期化する
+	glewExperimental = GL_TRUE;
+	if(glewInit() != GLEW_OK)
+	{
+		std::cerr << "Can't Initialize GLEW" << std::endl;
+		return -1;
+	}
+
+	// 垂直同期のタイミングを待つ
+	glfwSwapInterval(1);
+
+	// 背景色を指定
+	glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
+
+	// ウィンドウが開いている間繰り返す
+	while(!glfwWindowShouldClose(window))
+	{
+		// ウィンドウを消去する
+		glClear(GL_COLOR_BUFFER_BIT);
+
+		//
+		// ここで描画処理を行う
+		// 
+
+		// カラーバッファを入れ替える
+		glfwSwapBuffers(window);
+
+		// イベントを取り出す
+		glfwWaitEvents();
+	}
 }

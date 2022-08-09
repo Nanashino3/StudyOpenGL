@@ -30,5 +30,8 @@
     <ClInclude Include="Shape.h">
       <Filter>HeaderFile</Filter>
     </ClInclude>
+    <ClInclude Include="Window.h">
+      <Filter>HeaderFile</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

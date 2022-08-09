@@ -4,6 +4,7 @@
 #include <vector>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include "Window.h"
 #include "Shape.h"
 
 // プログラムオブジェクトのリンク結果を表示する
@@ -198,40 +199,24 @@ int main()
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	// ウィンドウを作成する
-	GLFWwindow* const window = glfwCreateWindow(640, 480, "Hello!", NULL, NULL);
-	if(window == NULL)
-	{
-		std::cerr << "Can't Create GLFW Window" << std::endl;
-		return -1;
-	}
-
-	// 作成したウィンドウをOpenGLの処理対象にする
-	glfwMakeContextCurrent(window);
-
-	// GLEWを初期化する
-	glewExperimental = GL_TRUE;
-	if(glewInit() != GLEW_OK)
-	{
-		std::cerr << "Can't Initialize GLEW" << std::endl;
-		return -1;
-	}
-
-	// 垂直同期のタイミングを待つ
-	glfwSwapInterval(1);
+	Window window;
 
 	// 背景色を指定
 	glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
 
-
 	// プログラムオブジェクトを作成する
 	const GLuint program(LoadProgram("point.vert", "point.frag"));
+
+	// uniform変数の場所を取得する
+	const GLint sizeLoc = glGetUniformLocation(program, "size");
+	const GLint scaleLoc = glGetUniformLocation(program, "scale");
+	const GLint locationLoc = glGetUniformLocation(program, "location");
 
 	// 図形データを作成する
 	std::unique_ptr<const Shape> shape = std::make_unique<const Shape>(2, 4, rectangle);
 
 	// ウィンドウが開いている間繰り返す
-	while(!glfwWindowShouldClose(window))
+	while(window)
 	{
 		// ウィンドウを消去する
 		glClear(GL_COLOR_BUFFER_BIT);
@@ -239,13 +224,15 @@ int main()
 		// シェーダプログラムの使用開始
 		glUseProgram(program);
 
+		// uniform変数に値を設定する
+		glUniform2fv(sizeLoc, 1, window.GetSize());
+		glUniform1f(scaleLoc, window.GetScale());
+		glUniform2fv(locationLoc, 1, window.GetLocation());
+
 		// 図形を描画する
 		shape->Draw();
 
 		// カラーバッファを入れ替える
-		glfwSwapBuffers(window);
-
-		// イベントを取り出す
-		glfwWaitEvents();
+		window.SwapBuffers();
 	}
 }

@@ -15,4 +15,20 @@
       <Filter>SourceFile</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="point.vert">
+      <Filter>SourceFile</Filter>
+    </None>
+    <None Include="point.frag">
+      <Filter>SourceFile</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Object.h">
+      <Filter>HeaderFile</Filter>
+    </ClInclude>
+    <ClInclude Include="Shape.h">
+      <Filter>HeaderFile</Filter>
+    </ClInclude>
+  </ItemGroup>
 </Project>

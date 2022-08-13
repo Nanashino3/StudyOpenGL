@@ -5,6 +5,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include "Window.h"
+#include "Matrix.h"
 #include "Shape.h"
 
 // プログラムオブジェクトのリンク結果を表示する
@@ -164,9 +165,9 @@ GLuint LoadProgram(const char* vert, const char* frag)
 {
 	// シェーダのソースファイルを読み込む
 	std::vector<GLchar> vsrc;
-	const bool vstat(ReadShaderSource(vert, vsrc));
+	const bool vstat = ReadShaderSource(vert, vsrc);
 	std::vector<GLchar> fsrc;
-	const bool fstat(ReadShaderSource(frag, fsrc));
+	const bool fstat = ReadShaderSource(frag, fsrc);
 
 	// プログラムオブジェクトを作成する
 	return vstat && fstat ? CreateProgram(vsrc.data(), fsrc.data()) : 0;
@@ -205,12 +206,11 @@ int main()
 	glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
 
 	// プログラムオブジェクトを作成する
-	const GLuint program(LoadProgram("point.vert", "point.frag"));
+	const GLuint program = LoadProgram("point.vert", "point.frag");
 
 	// uniform変数の場所を取得する
-	const GLint sizeLoc = glGetUniformLocation(program, "size");
-	const GLint scaleLoc = glGetUniformLocation(program, "scale");
-	const GLint locationLoc = glGetUniformLocation(program, "location");
+	const GLint modelViewLoc = glGetUniformLocation(program, "modelView");
+	const GLint projectionLoc = glGetUniformLocation(program, "projection");
 
 	// 図形データを作成する
 	std::unique_ptr<const Shape> shape = std::make_unique<const Shape>(2, 4, rectangle);
@@ -224,10 +224,25 @@ int main()
 		// シェーダプログラムの使用開始
 		glUseProgram(program);
 
+		// 直行投影変換行列を求める
+		const GLfloat* const size = window.GetSize();
+		const GLfloat fovy = window.GetScale() * 0.01f;
+		const GLfloat aspect = size[0] / size[1];
+		const Matrix projection = Matrix::Perspective(fovy, aspect, 1.0f, 10.0f);
+		
+		// モデル変換行列を求める
+		const GLfloat* const location = window.GetLocation();
+		const Matrix model = Matrix::Translate(location[0], location[1], 0.0f);
+
+		// ビュー変換行列を求める
+		const Matrix view = Matrix::LookAt(3.0f, 4.0f, 5.0f, 0.0f, 0.0f, 0.0, 0.0f, 1.0f, 0.0f);
+
+		// モデルビュー変換行列を求める
+		const Matrix modelView = view * model;
+
 		// uniform変数に値を設定する
-		glUniform2fv(sizeLoc, 1, window.GetSize());
-		glUniform1f(scaleLoc, window.GetScale());
-		glUniform2fv(locationLoc, 1, window.GetLocation());
+		glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, projection.Data());
+		glUniformMatrix4fv(modelViewLoc, 1, GL_FALSE, modelView.Data());
 
 		// 図形を描画する
 		shape->Draw();

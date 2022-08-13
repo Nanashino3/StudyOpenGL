@@ -9,8 +9,8 @@ public:
 	//	 size：頂点の位置の次元
 	//	 vertexCount：頂点の数
 	//	 vertex：頂点属性を格納した配列
-	Shape(GLint size, GLsizei vertexCount, const Object::VERTEX* vertex)
-	: m_object(std::make_shared<Object>(size, vertexCount, vertex))
+	Shape(GLint size, GLsizei vertexCount, const Object::VERTEX* vertex, GLsizei indexCount = 0, const GLuint* index = NULL)
+	: m_object(std::make_shared<Object>(size, vertexCount, vertex, indexCount, index))
 	, m_vertexCount(vertexCount)
 	{}
 

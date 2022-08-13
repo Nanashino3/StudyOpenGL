@@ -36,5 +36,14 @@
     <ClInclude Include="Matrix.h">
       <Filter>HeaderFile</Filter>
     </ClInclude>
+    <ClInclude Include="ShapeIndex.h">
+      <Filter>HeaderFile</Filter>
+    </ClInclude>
+    <ClInclude Include="SolidShapeIndex.h">
+      <Filter>HeaderFile</Filter>
+    </ClInclude>
+    <ClInclude Include="SolidShape.h">
+      <Filter>HeaderFile</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

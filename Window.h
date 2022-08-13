@@ -56,14 +56,7 @@ public:
 	explicit operator bool()
 	{
 		// イベントを取り出す
-		if(m_keyStatus == GLFW_RELEASE)
-		{
-			glfwWaitEvents();
-		}
-		else
-		{
-			glfwPollEvents();
-		}
+		glfwPollEvents();
 
 		// キーボードの状態を調べる
 		if(glfwGetKey(m_window, GLFW_KEY_LEFT) != GLFW_RELEASE)

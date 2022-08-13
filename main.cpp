@@ -7,6 +7,9 @@
 #include "Window.h"
 #include "Matrix.h"
 #include "Shape.h"
+#include "ShapeIndex.h"
+#include "SolidShapeIndex.h"
+#include "SolidShape.h"
 
 // プログラムオブジェクトのリンク結果を表示する
 //   program：プログラムオブジェクト名
@@ -104,6 +107,7 @@ GLuint CreateProgram(const char* vsrc, const char* fsrc)
 
 	// プログラムオブジェクトをリンクする
 	glBindAttribLocation(program, 0, "position");
+	glBindAttribLocation(program, 1, "color");
 	glBindFragDataLocation(program, 0, "fragment");
 	glLinkProgram(program);
 
@@ -173,13 +177,67 @@ GLuint LoadProgram(const char* vert, const char* frag)
 	return vstat && fstat ? CreateProgram(vsrc.data(), fsrc.data()) : 0;
 }
 
-// 矩形の頂点の位置
-constexpr Object::VERTEX rectangle[] = 
+// 面ごとに色を変えた六面体の頂点属性
+constexpr Object::VERTEX solidCubeVertex[] = 
 {
-	{-0.5f, -0.5f},
-	{ 0.5f, -0.5f},
-	{ 0.5f,  0.5f},
-	{-0.5f,  0.5f}
+	// 左
+	{ -1.0f, -1.0f, -1.0f, 0.1f, 0.8f, 0.1f },
+	{ -1.0f, -1.0f,  1.0f, 0.1f, 0.8f, 0.1f },
+	{ -1.0f,  1.0f,  1.0f, 0.1f, 0.8f, 0.1f },
+	{ -1.0f, -1.0f, -1.0f, 0.1f, 0.8f, 0.1f },
+	{ -1.0f,  1.0f,  1.0f, 0.1f, 0.8f, 0.1f },
+	{ -1.0f,  1.0f, -1.0f, 0.1f, 0.8f, 0.1f },
+
+	// 裏
+	{  1.0f, -1.0f, -1.0f, 0.8f, 0.1f, 0.8f },
+	{ -1.0f, -1.0f, -1.0f, 0.8f, 0.1f, 0.8f },
+	{ -1.0f,  1.0f, -1.0f, 0.8f, 0.1f, 0.8f },
+	{  1.0f, -1.0f, -1.0f, 0.8f, 0.1f, 0.8f },
+	{ -1.0f,  1.0f, -1.0f, 0.8f, 0.1f, 0.8f },
+	{  1.0f,  1.0f, -1.0f, 0.8f, 0.1f, 0.8f },
+	
+	// 下
+	{ -1.0f, -1.0f, -1.0f, 0.1f, 0.8f, 0.8f },
+	{  1.0f, -1.0f, -1.0f, 0.1f, 0.8f, 0.8f },
+	{  1.0f, -1.0f,  1.0f, 0.1f, 0.8f, 0.8f },
+	{ -1.0f, -1.0f, -1.0f, 0.1f, 0.8f, 0.8f },
+	{  1.0f, -1.0f,  1.0f, 0.1f, 0.8f, 0.8f },
+	{ -1.0f, -1.0f,  1.0f, 0.1f, 0.8f, 0.8f },
+	
+	// 右
+	{  1.0f, -1.0f,  1.0f, 0.1f, 0.1f, 0.8f },
+	{  1.0f, -1.0f, -1.0f, 0.1f, 0.1f, 0.8f },
+	{  1.0f,  1.0f, -1.0f, 0.1f, 0.1f, 0.8f },
+	{  1.0f, -1.0f,  1.0f, 0.1f, 0.1f, 0.8f },
+	{  1.0f,  1.0f, -1.0f, 0.1f, 0.1f, 0.8f },
+	{  1.0f,  1.0f,  1.0f, 0.1f, 0.1f, 0.8f },
+
+	// 上
+	{ -1.0f,  1.0f, -1.0f, 0.8f, 0.1f, 0.1f },
+	{ -1.0f,  1.0f,  1.0f, 0.8f, 0.1f, 0.1f },
+	{  1.0f,  1.0f,  1.0f, 0.8f, 0.1f, 0.1f },
+	{ -1.0f,  1.0f, -1.0f, 0.8f, 0.1f, 0.1f },
+	{  1.0f,  1.0f,  1.0f, 0.8f, 0.1f, 0.1f },
+	{  1.0f,  1.0f, -1.0f, 0.8f, 0.1f, 0.1f },
+
+	// 前
+	{ -1.0f, -1.0f,  1.0f, 0.8f, 0.8f, 0.1f },
+	{  1.0f, -1.0f,  1.0f, 0.8f, 0.8f, 0.1f },
+	{  1.0f,  1.0f,  1.0f, 0.8f, 0.8f, 0.1f },
+	{ -1.0f, -1.0f,  1.0f, 0.8f, 0.8f, 0.1f },
+	{  1.0f,  1.0f,  1.0f, 0.8f, 0.8f, 0.1f },
+	{ -1.0f,  1.0f,  1.0f, 0.8f, 0.8f, 0.1f }
+};
+
+// 六面体の面を塗りつぶす三角形の頂点のインデックス
+constexpr GLuint solidCubeIndex[] = 
+{
+	 0,  1,  2,  3,  4,  5, // 左
+	 6,  7,  8,  9, 10, 11, // 裏
+	12, 13, 14, 15, 16, 17, // 下
+	18, 19, 20, 21, 22, 23, // 右
+	24, 25, 26, 27, 28, 29, // 上
+	30, 31, 32, 33, 34, 35, // 前
 };
 
 int main()
@@ -205,6 +263,16 @@ int main()
 	// 背景色を指定
 	glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
 
+	// 背面カリングを有効にする
+	glFrontFace(GL_CCW);
+	glCullFace(GL_BACK);
+	glEnable(GL_CULL_FACE);
+
+	// デプスバッファを有効にする
+	glClearDepth(1.0);
+	glDepthFunc(GL_LESS);
+	glEnable(GL_DEPTH_TEST);
+
 	// プログラムオブジェクトを作成する
 	const GLuint program = LoadProgram("point.vert", "point.frag");
 
@@ -213,13 +281,15 @@ int main()
 	const GLint projectionLoc = glGetUniformLocation(program, "projection");
 
 	// 図形データを作成する
-	std::unique_ptr<const Shape> shape = std::make_unique<const Shape>(2, 4, rectangle);
+	std::unique_ptr<const Shape> shape = std::make_unique<const SolidShapeIndex>(3, 36, solidCubeVertex, 36, solidCubeIndex);
+
+	glfwSetTime(0.0);
 
 	// ウィンドウが開いている間繰り返す
 	while(window)
 	{
 		// ウィンドウを消去する
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// シェーダプログラムの使用開始
 		glUseProgram(program);
@@ -232,7 +302,8 @@ int main()
 		
 		// モデル変換行列を求める
 		const GLfloat* const location = window.GetLocation();
-		const Matrix model = Matrix::Translate(location[0], location[1], 0.0f);
+		const Matrix rotate = Matrix::Rotate(static_cast<GLfloat>(glfwGetTime()), 0.0f, 1.0f, 0.0f);
+		const Matrix model = Matrix::Translate(location[0], location[1], 0.0f) * rotate;
 
 		// ビュー変換行列を求める
 		const Matrix view = Matrix::LookAt(3.0f, 4.0f, 5.0f, 0.0f, 0.0f, 0.0, 0.0f, 1.0f, 0.0f);
@@ -245,6 +316,15 @@ int main()
 		glUniformMatrix4fv(modelViewLoc, 1, GL_FALSE, modelView.Data());
 
 		// 図形を描画する
+		shape->Draw();
+
+		// 2つ目のモデルビュー変換行列を求める
+		const Matrix modelView1 = modelView * Matrix::Translate(0.0f, 0.0f, 3.0f);
+
+		// uniform変数に値を設定する
+		glUniformMatrix4fv(modelViewLoc, 1, GL_FALSE, modelView1.Data());
+
+		// 2つ目の図形を描画する
 		shape->Draw();
 
 		// カラーバッファを入れ替える

@@ -14,12 +14,24 @@
     <ClCompile Include="main.cpp">
       <Filter>SourceFile</Filter>
     </ClCompile>
+    <ClCompile Include="Tutorials_1.cpp">
+      <Filter>SourceFile</Filter>
+    </ClCompile>
+    <ClCompile Include="Tutorials_2.cpp">
+      <Filter>SourceFile</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="point.vert">
       <Filter>SourceFile</Filter>
     </None>
     <None Include="point.frag">
+      <Filter>SourceFile</Filter>
+    </None>
+    <None Include="Sample.vert">
+      <Filter>SourceFile</Filter>
+    </None>
+    <None Include="Sample.frag">
       <Filter>SourceFile</Filter>
     </None>
   </ItemGroup>

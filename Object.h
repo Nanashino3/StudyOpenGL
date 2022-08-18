@@ -8,7 +8,7 @@ public:
 	struct VERTEX
 	{
 		GLfloat position[3]; // 位置
-		GLfloat color[3];	 // 色
+		GLfloat normal[3];	 // 法線
 	};
 
 	// コンストラクタ
@@ -31,7 +31,7 @@ public:
 		// 結合されている頂点バッファオブジェクトをin変数から参照できるようにする
 		glVertexAttribPointer(0, size, GL_FLOAT, GL_FALSE, sizeof(VERTEX), static_cast<VERTEX*>(0)->position);
 		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VERTEX), static_cast<VERTEX*>(0)->color);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VERTEX), static_cast<VERTEX*>(0)->normal);
 		glEnableVertexAttribArray(1);
 
 		// インデックスの頂点バッファオブジェクト
